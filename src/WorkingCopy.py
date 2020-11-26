@@ -1,6 +1,8 @@
 import dash
+import os
 import pandas as pd
 from data_processing import scaler
+from helper_functions import update_scatter_map
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -15,7 +17,8 @@ mapbox_access_token = "pk.eyJ1IjoiYW1lcmljYW50aGlua2VyIiwiYSI6ImNraGx5ZXlvYjBrMj
 px.set_mapbox_access_token(mapbox_access_token)
 
 #Load data
-vets = pd.read_csv('data/merged_df_dash.csv')
+data_path = "/Users/americanthinker/DataScience/Projects/DataEngineering/Cap_Stone_II/data/"
+vets = pd.read_csv(os.path.join(data_path, 'merged_df_dash.csv'))
 
 #***Use map_df for mapping only!!!***
 #rescale sizing and set df for mapping /
@@ -59,7 +62,7 @@ def setScatLayout(fig):
         width=1100, height=600,
         mapbox=dict(
             accesstoken=mapbox_access_token,
-            style='dark',
+            style='light',
             center=dict(lat=38.7, lon=-98.5795),
             zoom=3.75),
     margin={'l':0, 'r':0, 'b':0, 't':0}
@@ -76,7 +79,6 @@ barchart.update_layout(
 )
 
 #fig.update_yaxes(automargin=True)
-
 
 app.layout = html.Div(id='app-container',
     children = [
@@ -149,16 +151,9 @@ app.layout = html.Div(id='app-container',
                     dcc.Dropdown(
                         id='Tribes',
                         options=[],
-                        style={#"position": "absolute",
-                               #"visibility":"hidden",
-                               "overflow": "scroll",
-                               "white-space": "pre",
-                               "font-size": "12px",
-                               "font-family": "HelveticaNeue",
-                               "font-weight": 400,
-                               "font-style": "normal",
-                               "letter-spacing": "normal",
-                               "text-transform": "none"},
+                        style=dict(
+                            marginBottom='15px'
+                        ),
                         value=[],
                         # allows user to select multiple drop down options
                         multi=True,
@@ -197,8 +192,8 @@ app.layout = html.Div(id='app-container',
                                             figure=dict(
                                                 data=[dict(x=0, y=0)],
                                                 layout=dict(
-                                                    paper_bgcolor="#F4F4F8",
-                                                    plot_bgcolor="#F4F4F8",
+                                                    paper_bgcolor="grey",
+                                                    plot_bgcolor="grey",
                                                     autofill=True,
                                                     margin=dict(t=75, r=50, b=100, l=50)
                                                         ),
@@ -277,7 +272,7 @@ def update_map(selected_branches, selected_tribes):
                        size_max=points['Id'].max()
                        )
 
-        setScatLayout(new_update)
+
         new_update.layout.update(showlegend=False,
                                  hoverlabel=dict(
                                      font_size=12,
@@ -316,7 +311,7 @@ def update_map(selected_branches, selected_tribes):
                                        size_max=points['Id'].max()
                                        )
 
-        setScatLayout(new_update)
+
         new_update.layout.update(showlegend=False)
         return new_update
 
@@ -347,7 +342,7 @@ def update_bar(selected_branches, selected_tribes):
                                 'Navy': 'blue',
                                 'Army': 'green',
                                 'Air Force': 'skyblue',
-                                'Marine Corps': 'red',},
+                                'Marine Corps': 'red'},
                             text='Count',
                             )
 
