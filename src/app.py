@@ -10,7 +10,7 @@ external_stylesheets = ['https://codepen.io/anon/pen/mardKv.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 #Step 2. Import Data
-vets = pd.read_csv('vets_coords.csv')
+vets = pd.read_csv('data/vets_coords.csv')
 merged = pd.read_csv('merged_df_dash.csv')
 
 #Step 3. Create Dropdown options

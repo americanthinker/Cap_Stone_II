@@ -1,0 +1,16 @@
+#dropdowns .Select-has-value-is-clearable-is-searchable .Select--multi {
+  background-color: #ff444;
+  color: #fff;
+}
+
+#dropdown .Select-value-label {
+  color: red;
+}
+
+#dropdowns .VirtualizedSelectFocusedOption {
+  background-color: #ffeedd;
+}
+
+h1 {
+color: hotpink
+}
