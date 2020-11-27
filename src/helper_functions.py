@@ -26,22 +26,6 @@ def update_scatter_map(fig):
     margin={'l':0, 'r':0, 'b':0, 't':0}
     )
 
-def update_bar_chart(chart):
-    '''
-    Updates bar chart with "update layout" method
-    '''
-    chart.update_layout(
-        font_family='Balto',
-        title=dict(text='Total Count by Branch', x=0.5),
-        font=dict(size=18, color='#7FDBFF'),
-        titlefont_size=40,
-        showlegend=False,
-        paper_bgcolor="slategrey",
-        plot_bgcolor="slategrey",
-        #margin={'l': 0, 'r': 0, 'b': 0, 't': 0}
-        margin=dict(t=75, r=50, b=100, l=50)
-    )
-
 def plot_points(data):
     '''
     Plots all points from input dataframe
@@ -67,3 +51,20 @@ def plot_points(data):
                        height=500
                        )
     return fig
+
+def update_bar_chart(chart, chart_title):
+    '''
+    Updates bar chart with "update layout" method
+    '''
+    update = chart.update_layout(
+        font_family='Balto',
+        title=dict(text=chart_title, x=0.5),
+        font=dict(size=18, color='#7FDBFF'),
+        titlefont_size=34,
+        showlegend=False,
+        paper_bgcolor="slategrey",
+        plot_bgcolor="slategrey",
+        #margin={'l': 0, 'r': 0, 'b': 0, 't': 0}
+        margin=dict(t=75, r=50, b=100, l=50)
+    )
+    return update
