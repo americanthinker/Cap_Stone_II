@@ -29,10 +29,6 @@ are based on 10px sizing. So basically 1.5rem = 15px :) */
 
 /* Typography
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-body {
-    font-family: Times !important;
-}
-
 .li {
     margin-left: 35px;
 }

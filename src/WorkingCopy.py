@@ -11,8 +11,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 #launch app, using  __name__ for deployment and SLATE style theme
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
-# meta_tags=[{'name': 'viewport', 'content': 'width=device-width, initial-scale=3'}
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SLATE], meta_tags=[{'name': 'viewport', 'content': 'width=device-width, initial-scale=3'}])
 server = app.server
 
 #initialize mapbox access through API
@@ -88,7 +87,7 @@ app.layout = html.Div(id='app-container',
 #Elite Meet logo block
                     dbc.Col(width=5,
                             children=[
-                                html.Div(html.Img(id='em-logo', style=dict(height='100px', marginLeft='65%', marginTop=20),
+                                html.Div(html.Img(id='em-logo', style=dict(height='20%', marginLeft='65%', marginTop=20),
                                          src=app.get_asset_url('EM-logo.svg')))
                                     ]
                             )
