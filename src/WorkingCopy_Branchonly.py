@@ -134,6 +134,7 @@ app.layout = html.Div(id='app-container',
                              fontFamily='Times',
                              marginLeft='20px')
                                ),
+#Branch dropdown
                     dcc.Dropdown(
                         id='Branches',
                         style=dict(marginLeft='10px'),
@@ -160,6 +161,7 @@ app.layout = html.Div(id='app-container',
                                                   fontSize=16))))
                         ]
                     ),
+#tribe dropdown
             dbc.Col(id='tribe-dropdown', width=dict(size=3),
                 children=[
                     html.Label('SOF Tribe',
@@ -209,26 +211,6 @@ app.layout = html.Div(id='app-container',
 
                     ])
                 ])
-'''
-#Populate the SOF Tribes options based on Service Branch dropdown
-@app.callback(
-    Output('Tribes', 'options'),
-    Input('Branches', 'value')
-)
-def set_tribe_options(branch):
-    if isinstance(branch, str):
-        branch = [branch]
-    tribes = vets[vets['Branch'].isin(branch)]['Tribe'].unique()
-    return [{'label': tribe, 'value':tribe} for tribe in tribes]
-
-#Populate intitial SOF Tribes options based on initial Service Branch DD option
-@app.callback(
-    Output('Tribes', 'value'),
-    Input('Tribes', 'options')
-)
-def set_tribes_value(available_options):
-    return [x['value'] for x in available_options]
-'''
 
 #Plot points on map based on input values
 @app.callback(
