@@ -1,5 +1,6 @@
 #modular functions used for various reasons for app.py to declutter the code
 import plotly.express as px
+from textwrap import wrap
 import os
 
 #initialize mapbox access token
@@ -52,13 +53,13 @@ def plot_points(data):
                        )
     return fig
 
-def update_bar_chart(chart, chart_title):
+def update_bar_chart(chart, chart_title=None, total_sum=None):
     '''
     Updates bar chart with "update layout" method
     '''
     update = chart.update_layout(
         font_family='Balto',
-        title=dict(text=chart_title, x=0.5),
+        title=dict(text=f'{chart_title}       Total = {total_sum}', x=0.5),
         font=dict(size=18, color='#7FDBFF'),
         titlefont_size=34,
         showlegend=False,

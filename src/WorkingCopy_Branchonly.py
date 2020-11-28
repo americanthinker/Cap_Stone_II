@@ -4,10 +4,12 @@ import pandas as pd
 import json
 from data_processing import scaler
 from helper_functions import update_scatter_map, update_bar_chart, plot_points
+from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
+import dash_daq as daq
 import plotly.graph_objects as go
 import plotly.express as px
 
@@ -22,6 +24,8 @@ px.set_mapbox_access_token(mapbox_access_token)
 #Load data
 data_path = "/Users/americanthinker/DataScience/Projects/DataEngineering/Cap_Stone_II/data/"
 vets = pd.read_csv(os.path.join(data_path, 'merged_df_dash.csv'))
+table_df = vets['Branch'].value_counts()[:4].to_frame().T
+table_df['Total'] = table_df.sum(axis=1)
 
 #***Use map_df for mapping only!!!***
 #rescale sizing and set df for mapping /
@@ -50,14 +54,20 @@ update_scatter_map(map_fig)
 
 #create figure object for bar graph
 barchart = go.Figure(go.Bar())
-update_bar_chart(barchart, None)
+update_bar_chart(barchart)
+
+test = pd.DataFrame(
+                                    {
+                                        "First Name": ["Arthur", "Ford", "Zaphod", "Trillian"],
+                                        "Last Name": ["Dent", "Prefect", "Beeblebrox", "Astra"],
+                                    })
 
 #HTML structure for app
 app.layout = html.Div(id='app-container',
     children = [
                 dbc.Row(
 #Title and header block
-                    [dbc.Col(width=7,
+                    [dbc.Col(width=4,
                         children=[
                             html.H2(id='title',
                                  children='Elite Meet National Distribution',
@@ -86,12 +96,30 @@ app.layout = html.Div(id='app-container',
                                             ]
                                     )]),
 #Elite Meet logo block
-                    dbc.Col(width=5,
+                    dbc.Col(width=4,
                             children=[
-                                html.Div(html.Img(id='em-logo', style=dict(height='20%', marginLeft='65%', marginTop=20),
-                                         src=app.get_asset_url('EM-logo.svg')))
+                                html.Img(id='em-logo', #style=dict(height='20%', marginLeft='65%', marginTop=20),
+                                         src=app.get_asset_url('em-logo.png'))
                                     ]
-                            )
+                            ),
+                     dbc.Col(width=4, id='data-table', align='baseline',
+                        children=[
+                                html.H2('Service Branch Total Counts',
+                                        style=dict(fontFamily='Balto',
+                                                   marginTop=40,
+                                                   textAlign='center')),
+                                dbc.Table.from_dataframe(table_df,
+                                             striped=True,
+                                             style=dict(fontFamily='Balto',
+                                                        textAlign='center',
+                                                        fontSize=20
+                                                        ),
+                                             dark=True,
+                                             responsive=True,
+                                             bordered=True,
+                                             hover=True)
+                             ]
+                             )
                      ]
                  ),
 #Drop down menu row
@@ -110,7 +138,42 @@ app.layout = html.Div(id='app-container',
                         id='Branches',
                         style=dict(marginLeft='10px'),
                         options=branch_selection,
-                        value='Navy',
+                        value=['Navy', 'Army', 'Marine Corps', 'Air Force'],
+                        # allows user to select multiple drop down options
+                        multi=True,
+                        clearable=True
+                        # allows the user to remove all options
+                        #placeholder='Select a Service Branch...',
+                                )
+                        ]
+                    ),
+            dbc.Col(id='toggle-button', width=1,
+                children=[
+                    html.Div(
+                        daq.ToggleSwitch(id='Toggle',
+                            theme='dark',
+                            size=60,
+                            color='#7FDBFF',
+                            labelPosition='bottom',
+                            label=dict(label='Branch or Tribe',
+                                       style=dict(fontFamily='Balto',
+                                                  fontSize=16))))
+                        ]
+                    ),
+            dbc.Col(id='tribe-dropdown', width=dict(size=3),
+                children=[
+                    html.Label('SOF Tribe',
+                               style=dict(
+                                   fontSize=24,
+                                   fontFamily='Times')
+                               ),
+                    dcc.Dropdown(
+                        id='Tribes',
+                        options=[],
+                        style=dict(
+                            marginBottom='15px'
+                        ),
+                        value=[],
                         # allows user to select multiple drop down options
                         multi=True,
                         # allows the user to remove all options
@@ -134,7 +197,7 @@ app.layout = html.Div(id='app-container',
                              ),
 #bar chart block
                      dbc.Col(width=5,
-                             children=html.Div(id='bar-chart-div',
+                             children=html.Div(id='bar-chart-div', style=dict(marginRight='20px'),
                                   children=dcc.Graph(id='bar-chart',
                                                  style=dict(height='60vh'),
                                                  figure=barchart,
@@ -146,7 +209,7 @@ app.layout = html.Div(id='app-container',
 
                     ])
                 ])
-"""
+'''
 #Populate the SOF Tribes options based on Service Branch dropdown
 @app.callback(
     Output('Tribes', 'options'),
@@ -165,60 +228,48 @@ def set_tribe_options(branch):
 )
 def set_tribes_value(available_options):
     return [x['value'] for x in available_options]
-"""
+'''
+
 #Plot points on map based on input values
 @app.callback(
     Output('scatter-map', 'figure'),
-    Input('Branches', 'value'),
-    #Input('Tribes', 'value')
+    Input('Branches', 'value')
 )
 def update_map(selected_branches):
-    px.set_mapbox_access_token(mapbox_access_token)
-
-    #return plotted points grouped by Service Branch
-    # *** Make sure to include "selected_tribes" asn an option when going back ***
-    if isinstance(selected_branches, str):
-        selected_branches = [selected_branches]
-    temp = map_df[map_df['Branch'].isin(selected_branches)]
-    points = temp.groupby(['Branch','latitude', 'longitude', 'CityState'])['Id'] \
-        .count().to_frame().reset_index()
-    #create text column for hover info
-    points['text'] = points['CityState'] + ': ' + points['Id'].astype(str)
-    points['Id'] = scaler(points['Id'], 4, 26)
-
-    #call helper functions to update points on map
-    new_map_update = plot_points(points)
-    update_scatter_map(new_map_update)
-
-    return new_map_update
-
-"""
+    if selected_branches is None:
+        raise PreventUpdate
+    elif len(selected_branches) == 0:
+        return map_fig
     else:
+        px.set_mapbox_access_token(mapbox_access_token)
         if isinstance(selected_branches, str):
             selected_branches = [selected_branches]
-        temp = map_df[(map_df['Branch'].isin(selected_branches))&(map_df['Tribe'].isin(selected_tribes))]
-        points = temp.groupby(['Branch', 'Tribe', 'latitude', 'longitude', 'CityState'])['Id'] \
-            .count().to_frame().reset_index()
-        points['text'] = points['CityState'] + ': ' + points['Id'].astype(str)
-        points['Id'] = scaler(points['Id'], 4, 26)
+            temp = map_df[map_df['Branch'].isin(selected_branches)]
+            points = temp.groupby(['Branch', 'latitude', 'longitude', 'CityState'])['Id'] \
+                .count().to_frame().reset_index()
+            # create text column for hover info
+            points['text'] = points['CityState'] + ': ' + points['Id'].astype(str)
+            points['Id'] = scaler(points['Id'], 4, 26)
 
-        # call helper functions to update points on map
-        new_map_update = plot_points(points)
-        update_scatter_map(new_map_update)
+            # call helper functions to update points on map
+            new_map_update = plot_points(points)
+            update_scatter_map(new_map_update)
+            return new_map_update
 
-        return new_map_update
-"""
-@app.callback(
-    Output('title', 'children'),
-    Input('scatter-map', 'hoverData'))
-def display_click_data(hoverData):
-    if hoverData is None:
-        return 'San Diego, California'
-    else:
-        print(json.dumps(hoverData))
-        location = hoverData['points'][0]['hovertext'].split(':')[0]
-        return html.P(location)
+        else:
+            print(selected_branches)
+            temp = map_df[map_df['Branch'].isin(selected_branches)]
+            points = temp.groupby(['Branch', 'latitude', 'longitude', 'CityState'])['Id'] \
+                .count().to_frame().reset_index()
+            # create text column for hover info
+            points['text'] = points['CityState'] + ': ' + points['Id'].astype(str)
+            points['Id'] = scaler(points['Id'], 4, 26)
 
+            # call helper functions to update points on map
+            new_map_update = plot_points(points)
+            update_scatter_map(new_map_update)
+
+            return new_map_update
 
 # plot bars based on plotted points on map
 @app.callback(
@@ -231,6 +282,7 @@ def update_bar(hoverData):
         temp_df = map_df[map_df['CityState'] == location]
         chart_df = temp_df['Branch'].value_counts().to_frame().reset_index()
         chart_df.rename(columns={'Branch': 'Count', 'index': 'Branch'}, inplace=True)
+        total_sum = chart_df['Count'].sum()
 
         new_bar_update = px.bar(chart_df,
                                 x='Branch',
@@ -245,7 +297,12 @@ def update_bar(hoverData):
                                     'Marine Corps': 'red'},
                                 text='Count',
                                 )
-        update_bar_chart(new_bar_update, location)
+        update_bar_chart(new_bar_update, location, total_sum)
+        new_bar_update.update_traces(
+            marker_line=dict(
+                width=2.5,
+                color='black'),
+            selector=dict(type='bar'))
         return new_bar_update
 
     else:
@@ -254,6 +311,7 @@ def update_bar(hoverData):
         # transform dataframe into branch and values format for ease of use with px.bar
         chart_df = temp_df['Branch'].value_counts().to_frame().reset_index()
         chart_df.rename(columns={'Branch': 'Count', 'index': 'Branch'}, inplace=True)
+        total_sum = chart_df['Count'].sum()
 
         new_bar_update = px.bar(chart_df,
                                 x='Branch',
@@ -268,11 +326,29 @@ def update_bar(hoverData):
                                     'Marine Corps': 'red'},
                                 text='Count',
                                 )
-        update_bar_chart(new_bar_update, location)
+        update_bar_chart(new_bar_update, location, total_sum)
+        new_bar_update.update_traces(
+            marker_line=dict(
+                width=2.5,
+                color='black'),
+            selector=dict(type='bar'))
         return new_bar_update
-
-
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)
+
+'''
+
+
+
+@app.callback(
+    Output('title', 'children'),
+    Input('scatter-map', 'hoverData'))
+def display_click_data(hoverData):
+    if hoverData is None:
+        return 'San Diego, California'
+    else:
+        print(json.dumps(hoverData))
+        location = hoverData['points'][0]['hovertext'].split(':')[0]
+        return html.P(location)
+'''
