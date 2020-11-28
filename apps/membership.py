@@ -2,8 +2,7 @@ import dash
 import os
 import pandas as pd
 import json
-from data_processing import scaler
-from helper_functions import update_scatter_map, update_bar_chart, plot_points
+from helper_functions import scaler, update_scatter_map, update_bar_chart, plot_points
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
@@ -24,16 +23,17 @@ px.set_mapbox_access_token(mapbox_access_token)
 #Load data
 data_path = "/Users/americanthinker/DataScience/Projects/DataEngineering/Cap_Stone_II/data/"
 vets = pd.read_csv(os.path.join(data_path, 'updated_pilots.csv'))
-table_df = vets['Branch'].value_counts()[:4].to_frame().T
-table_df['Total'] = table_df.sum(axis=1)
+#create membership total tables for branch and tribes
+branch_table_df = vets['Branch'].value_counts()[:4].to_frame().T
+branch_table_df['Total'] = branch_table_df.sum(axis=1)
+tribe_table_df = vets['Tribe'].value_counts().to_frame().T
+tribe_table_df['Total'] = tribe_table_df.sum(axis=1)
 
 #***Use map_df for mapping only!!!***
 #rescale sizing and set df for mapping /
 map_df = vets[vets['scaled'].notnull()]
 map_df = map_df[map_df['CityState'] != 'NC, NC']
 map_df = map_df[map_df['Branch'] != 'Coast Guard']
-
-#bubble_sizes = scaler(map_df['scaled'], 4, 26)
 
 #reate branch and tribe options
 branches = map_df['Branch'].unique()
@@ -90,30 +90,29 @@ app.layout = html.Div(id='app-container',
                                                 ),
                                             ]
                                     )]),
-#Elite Meet logo block
-                    dbc.Col(width=3,
+# Elite Meet logo block
+                    dbc.Col(width=3, #style=dict(backgroundColor='yellow'),
                             children=[
-                                html.Img(id='em-logo', #style=dict(height='20%', marginLeft='65%', marginTop=20),
-                                         src=app.get_asset_url('em-logo.png'))
+                                html.Img(id='em-logo',
+                                         src=app.get_asset_url('em-logo.png')),
+# Toggle switch
+                                html.Div(id='toggle-div',
+                                        children=daq.ToggleSwitch(id='toggle-switch',
+                                            color='#7FDBFF',
+                                            size=70,
+
+                                            label='Branch or Tribe',
+                                            style=dict(#backgroundColor='red',
+                                                       width='10vh',
+                                                       marginTop='5vh',
+                                                       marginLeft='40vh',
+                                                       align='end'))
+                                        )
                                     ]
                             ),
+# Member data tables
                      dbc.Col(width=4, id='data-table', align='baseline',
-                        children=[
-                                html.H2('Service Branch Total Counts',
-                                        style=dict(fontFamily='Balto',
-                                                   marginTop=40,
-                                                   textAlign='center')),
-                                dbc.Table.from_dataframe(table_df,
-                                             striped=True,
-                                             style=dict(fontFamily='Balto',
-                                                        textAlign='center',
-                                                        fontSize=20
-                                                        ),
-                                             dark=True,
-                                             responsive=True,
-                                             bordered=True,
-                                             hover=True)
-                             ]
+                        children=[]
                              )
                      ]
                  ),
@@ -173,7 +172,7 @@ app.layout = html.Div(id='app-container',
 #Tribe dropdown
     dbc.Row(id='dropdown-2',
         children=[
-            dbc.Col(id='tribe-dropdown', width=dict(size=3), style=dict(marginTop='25px', marginLeft='25px'),
+            dbc.Col(id='tribe-dropdown', width=dict(size=3), style=dict(marginTop='25px', marginLeft='25px'), #backgroundColor='red', ),
                 children=[
                     html.Label('SOF Tribe',
                                style=dict(
@@ -193,7 +192,17 @@ app.layout = html.Div(id='app-container',
                         clearable=True,
                                 )
                         ]
-                    )
+                    ),
+            dbc.Col(id='tribe-buttons', width=4, #style=dict(backgroundColor='skyblue'),
+                children = html.Div(
+    [
+        dbc.Button("Navy", color="primary", style=dict(width='10vh'), className="mr-1"),
+        dbc.Button("Army", color="success", style=dict(width='10vh'), className="mr-1"),
+        dbc.Button("Marine Corps", color="danger", style=dict(width='15vh'), className="mr-1"),
+        dbc.Button("Air Force", color="skyblue", style=dict(width='10vh'), className="air-force"),
+    ], style=dict(marginTop='5vh')
+)
+                   )
                 ]
             ),
 
@@ -431,9 +440,69 @@ def update_bar(hoverData):
             selector=dict(type='bar'))
         return new_bar_update
 
+@app.callback(
+    Output('data-table', 'children'),
+    Input('toggle-switch', 'value')
+)
+def toggle(val):
+    if val == None:
+        children = [
+            html.H2(id='branch-data-table-header',
+                    children='Service Branch Total Counts',
+                    style=dict(fontFamily='Balto',
+                               marginTop=40,
+                               textAlign='center')),
+            dbc.Table.from_dataframe(branch_table_df,
+                                     striped=True,
+                                     style=dict(fontFamily='Balto',
+                                                textAlign='center',
+                                                fontSize=20
+                                                ),
+                                     dark=True,
+                                     responsive=True,
+                                     bordered=True)
+        ]
 
+        return children
 
+    elif val == False:
+        children = [
+            html.H2(id='branch-data-table-header',
+                    children='Service Branch Total Counts',
+                    style=dict(fontFamily='Balto',
+                               marginTop=40,
+                               textAlign='center')),
+            dbc.Table.from_dataframe(branch_table_df,
+                                     striped=True,
+                                     style=dict(fontFamily='Balto',
+                                                textAlign='center',
+                                                fontSize=20
+                                                ),
+                                     dark=True,
+                                     responsive=True,
+                                     bordered=True)
+        ]
 
+        return children
+
+    elif val == True:
+        children = [
+            html.H2(id='tribes-data-table-header',
+                    children='SOF Tribe Total Counts',
+                    style=dict(fontFamily='Balto',
+                               marginTop=40,
+                               textAlign='center')),
+            dbc.Table.from_dataframe(tribe_table_df,
+                                     striped=True,
+                                     style=dict(fontFamily='Balto',
+                                                textAlign='center',
+                                                fontSize=20
+                                                ),
+                                     dark=True,
+                                     responsive=True,
+                                     bordered=True)
+                    ]
+        return children
 
 if __name__ == "__main__":
     app.run_server(debug=True)

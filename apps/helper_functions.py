@@ -7,6 +7,20 @@ import os
 mapbox_access_token = os.environ.get('MAPBOX_API_KEY')
 px.set_mapbox_access_token(mapbox_access_token)
 
+def scaler(series, bottom_range, top_range):
+    '''
+    Scales data between a range between (bottom_range, top_range)
+    𝑥𝑛𝑜𝑟𝑚𝑎𝑙𝑖𝑧𝑒𝑑=(𝑏−𝑎) * 𝑥−𝑚𝑖𝑛(𝑥)     + a
+                    𝑚𝑎𝑥(𝑥)−𝑚𝑖𝑛(𝑥)
+    Input: pd.Series, np.array (list will not broadcast)
+    Ouput: scaled version of Input between bottom_range and top_range
+    '''
+    multiplier = top_range - bottom_range
+    numerator = series - min(series)
+    denominator = max(series) - min(series)
+    ans = multiplier * numerator/denominator
+    return ans + bottom_range
+
 def update_scatter_map(fig):
     '''
     Updates scatter map (fig) with "update_layout" method
