@@ -19,7 +19,8 @@ def update_scatter_map(fig):
         autosize=False,
         mapbox=dict(
             accesstoken=mapbox_access_token,
-            style='carto-positron',
+            style='dark',
+            #style='carto-positron',
             #set center as center of US
             center=dict(lat=38.7, lon=-98.5795),
             #set zoom to show entire US
@@ -39,7 +40,7 @@ def plot_points(data):
                         longitude=False
                        ),
                        opacity=0.7,
-                       color='Branch',
+                       color=data.columns[0],
                        color_discrete_map={
                            'Navy':'blue',
                            'Army':'green',
