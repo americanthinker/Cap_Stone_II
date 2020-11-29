@@ -1,4 +1,4 @@
-# Data Analytics Dashboard for CEO of Veterans Service Organization (Elite Meet)
+## Data Analytics Dashboard for CEO of Veterans Service Organization (Elite Meet)
 
 <p align="center">
   <img align="center" src="/assets/Dashboard-proto.png" width="1000" title="Dashboard prototype">
