@@ -1,6 +1,5 @@
 #modular functions used for various reasons for app.py to declutter the code
 import plotly.express as px
-from textwrap import wrap
 import os
 
 #initialize mapbox access token

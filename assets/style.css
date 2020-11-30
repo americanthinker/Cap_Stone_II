@@ -29,9 +29,13 @@ are based on 10px sizing. So basically 1.5rem = 15px :) */
 
 /* Typography
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-.li {
-    margin-left: 35px;
+li {
+    margin-left: 65px;
 }
+
+.navy {
+    color: #2222ff;
+  }
 /* Heatmap
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 

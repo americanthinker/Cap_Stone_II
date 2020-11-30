@@ -1,11 +1,10 @@
 import dash
 import os
 import pandas as pd
-import json
 from helper_functions import scaler, update_scatter_map, update_bar_chart, plot_points
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output
-import dash_core_components as dcc
+import dash_core_components  as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_daq as daq
@@ -94,15 +93,14 @@ app.layout = html.Div(id='app-container',
                     dbc.Col(width=3, #style=dict(backgroundColor='yellow'),
                             children=[
                                 html.Img(id='em-logo',
-                                         src=app.get_asset_url('em-logo.png')),
+                                         src=app.get_asset_url('EM-logo.svg')),
 # Toggle switch
-                                html.Div(id='toggle-div',
+                                html.Div(id='toggle-div', style=dict(backgroundColor='green'),
                                         children=daq.ToggleSwitch(id='toggle-switch',
                                             color='#7FDBFF',
                                             size=70,
-
                                             label='Branch or Tribe',
-                                            style=dict(#backgroundColor='red',
+                                            style=dict(backgroundColor='red',
                                                        width='10vh',
                                                        marginTop='5vh',
                                                        marginLeft='40vh',
@@ -159,7 +157,7 @@ app.layout = html.Div(id='app-container',
                      dbc.Col(width=5,
                              children=html.Div(id='bar-chart-div', style=dict(marginRight='25px'),
                                   children=dcc.Graph(id='bar-chart',
-                                                 style=dict(height='60vh'),
+                                                 style=dict(height='30vh'),
                                                  figure=barchart,
                                                  responsive=True)
                                                )
@@ -193,12 +191,13 @@ app.layout = html.Div(id='app-container',
                                 )
                         ]
                     ),
+#Service Branch buttons
             dbc.Col(id='tribe-buttons', width=4, #style=dict(backgroundColor='skyblue'),
                 children = html.Div(
     [
-        dbc.Button("Navy", color="primary", style=dict(width='10vh'), className="mr-1"),
+        dbc.Button("Navy", style=dict(width='10vh'), id='navy', className="mr-1"),
         dbc.Button("Army", color="success", style=dict(width='10vh'), className="mr-1"),
-        dbc.Button("Marine Corps", color="danger", style=dict(width='15vh'), className="mr-1"),
+        dbc.Button("Marine Corps", color="danger", style=dict(width='12vh'), className="mr-1"),
         dbc.Button("Air Force", color="skyblue", style=dict(width='10vh'), className="air-force"),
     ], style=dict(marginTop='5vh')
 )
@@ -206,7 +205,7 @@ app.layout = html.Div(id='app-container',
                 ]
             ),
 
-#Tribe scatter map block
+#Tribe scatter map bloc
     html.Div(id='graph-container-2', style=dict(marginLeft='25px'),
              children=[
                  dbc.Row([
@@ -222,7 +221,7 @@ app.layout = html.Div(id='app-container',
                      dbc.Col(width=5,
                              children=html.Div(id='bar-chart-div-2', style=dict(marginRight='25px'),
                                   children=dcc.Graph(id='bar-chart-2',
-                                                 style=dict(height='60vh'),
+                                                 style=dict(height='30vh'),
                                                  figure=barchart,
                                                  responsive=True)
                                                )
@@ -288,8 +287,9 @@ def update_bar(hoverData):
         total_sum = chart_df['Count'].sum()
 
         new_bar_update = px.bar(chart_df,
-                                x='Branch',
-                                y='Count',
+                                x='Count',
+                                y='Branch',
+                                orientation='h',
                                 hover_name='Count',
                                 # hover_data={chart_df.index:False},
                                 color='Branch',
@@ -317,9 +317,10 @@ def update_bar(hoverData):
         total_sum = chart_df['Count'].sum()
 
         new_bar_update = px.bar(chart_df,
-                                x='Branch',
-                                y='Count',
+                                x='Count',
+                                y='Branch',
                                 hover_name='Count',
+                                orientation='h',
                                 # hover_data={chart_df.index:False},
                                 color='Branch',
                                 color_discrete_map={
@@ -379,7 +380,7 @@ def update_map(selected_tribes):
 
 @app.callback(
     Output('bar-chart-2', 'figure'),
-    Input('scatter-map-2', 'hoverData')
+    Input('scatter-map', 'hoverData')
 )
 def update_bar(hoverData):
     if hoverData is None:
